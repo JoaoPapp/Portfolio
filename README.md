@@ -29,7 +29,17 @@ A proposta do projeto é criar uma solução tecnológica acessível e intuitiva
 
 O diferencial do projeto está em seu foco local, com a intenção de promover a solidariedade e o compartilhamento entre vizinhos, empresas e pequenos estabelecimentos, garantindo que alimentos não sejam desperdiçados. O sistema de agendamento de coleta torna o processo mais flexível, permitindo que doadores e receptores ajustem os horários de acordo com sua conveniência.
 
-O backend do aplicativo é gerido através do Firebase, que oferece suporte para autenticação, banco de dados em tempo real (Firestore) e notificações. Para a geolocalização, o projeto utiliza a Google Maps API para exibir as doações no mapa e gerenciar a localização dos usuários.
+# Tecnologias utilizadas
+## Frontend
+* React Native: Framework para desenvolvimento mobile, usado para criar as interfaces e funcionalidades interativas do aplicativo.
+* React Navigation: Biblioteca de navegação para React Native.
+* Google Maps API: API de mapas que oferece visualização de mapas interativos e serviços de geolocalização.
+* React Native Maps: Componente de mapa para React Native que usa o Google Maps.
+* Geolocation API: API para obter a localização atual do usuário em tempo real.
+* React Native Permissions: Biblioteca para solicitar permissões de acesso a recursos do dispositivo, como geolocalização.
 
-O projeto tem potencial para crescer com novas funcionalidades, como um sistema de gamificação para incentivar doações frequentes e a integração com ONGs e organizações comunitárias, facilitando a distribuição de grandes volumes de alimentos de forma organizada.
-
+  ## Backend
+* Firebase Authentication: Serviço de autenticação oferecido pelo Firebase.
+* Firebase Firestore: Banco de dados NoSQL em tempo real da plataforma Firebase.
+* Firebase Cloud Messaging (FCM): Serviço de envio de notificações push da Firebase.
+* Google Maps API (Geocoding e Places API): Além de renderizar mapas no front-end, também pode ser usada no back-end para transformar endereços em coordenadas geográficas (geocoding) ou para buscar lugares.
