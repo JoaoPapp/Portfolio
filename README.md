@@ -21,3 +21,15 @@ O aplicativo tem como principal diferencial a utilização de geolocalização p
 
 Este projeto foi desenvolvido com foco em pequenas comunidades e áreas urbanas de médio porte, onde soluções existentes podem não atender plenamente as necessidades locais. Através de uma abordagem prática e escalável, o aplicativo visa impactar positivamente essas regiões, criando um fluxo constante de doações e evitando que alimentos sejam desperdiçados.
 
+## 1. Descrição do Projeto
+
+O Aplicativo de Doação de Alimentos com Geolocalização é uma plataforma mobile projetada para facilitar a conexão entre doadores e receptores de alimentos excedentes em pequenas comunidades e áreas urbanas. O aplicativo utiliza a geolocalização como um meio principal de mapear e exibir doações disponíveis nas proximidades do usuário, promovendo a redução do desperdício de alimentos e facilitando o acesso de pessoas em situação de insegurança alimentar.
+
+A proposta do projeto é criar uma solução tecnológica acessível e intuitiva que permita aos doadores registrar alimentos não utilizados e aos receptores visualizarem, agendarem e coletarem esses alimentos de forma eficiente. Além disso, o aplicativo conta com notificações em tempo real, garantindo que os receptores sejam informados rapidamente sobre novas doações disponíveis.
+
+O diferencial do projeto está em seu foco local, com a intenção de promover a solidariedade e o compartilhamento entre vizinhos, empresas e pequenos estabelecimentos, garantindo que alimentos não sejam desperdiçados. O sistema de agendamento de coleta torna o processo mais flexível, permitindo que doadores e receptores ajustem os horários de acordo com sua conveniência.
+
+O backend do aplicativo é gerido através do Firebase, que oferece suporte para autenticação, banco de dados em tempo real (Firestore) e notificações. Para a geolocalização, o projeto utiliza a Google Maps API para exibir as doações no mapa e gerenciar a localização dos usuários.
+
+O projeto tem potencial para crescer com novas funcionalidades, como um sistema de gamificação para incentivar doações frequentes e a integração com ONGs e organizações comunitárias, facilitando a distribuição de grandes volumes de alimentos de forma organizada.
+
