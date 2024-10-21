@@ -1,50 +1,52 @@
 import React, { useEffect, useState } from 'react';
-import { View, Button } from 'react-native';
-import MapView, { Marker } from 'react-native-maps'; // Componente de mapa e marcador
-import Geolocation from '@react-native-community/geolocation'; // Biblioteca para obter geolocalização do usuário
-import auth from '@react-native-firebase/auth'; // Para logout
+import { View, Button, ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import Geolocation from '@react-native-community/geolocation';
+import auth from '@react-native-firebase/auth';
 
 export default function HomeScreen() {
-  const [location, setLocation] = useState({
-    latitude: 0,          // Inicializa latitude em 0 (será atualizado com a geolocalização)
-    longitude: 0,         // Inicializa longitude em 0
-    latitudeDelta: 0.0922, // Define o zoom do mapa (latitudeDelta)
-    longitudeDelta: 0.0421, // Define o zoom do mapa (longitudeDelta)
-  });
+  const [location, setLocation] = useState(null); // Inicia sem localização
+  const [loading, setLoading] = useState(true);   // Exibe loading inicialmente
 
   useEffect(() => {
-    // Hook para obter a localização do usuário quando a tela carrega
+    // Obtém a localização do usuário
     Geolocation.getCurrentPosition(
       position => {
-        const { latitude, longitude } = position.coords; // Extrai latitude e longitude das coordenadas do usuário
-        setLocation({
-          ...location,
-          latitude,
-          longitude,
-        }); // Atualiza o estado da localização com as coordenadas reais
+        const { latitude, longitude } = position.coords;
+        setLocation({ latitude, longitude, latitudeDelta: 0.0922, longitudeDelta: 0.0421 });
+        setLoading(false); // Desativa o loading após obter a localização
       },
-      error => console.log(error), // Trata erros de obtenção de localização
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 } // Configurações de precisão da localização
+      error => {
+        setLoading(false);
+        Alert.alert('Erro', 'Não foi possível obter sua localização.');
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
-  }, []); // Executa apenas uma vez ao montar a tela
+  }, []);
+
+  const handleLogout = () => {
+    auth()
+      .signOut()
+      .then(() => Alert.alert('Você saiu com sucesso!'))
+      .catch(error => Alert.alert('Erro', error.message));
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />;
+  }
 
   return (
-    <View style={{ flex: 1 }}>
-      <MapView
-        style={{ flex: 1 }}
-        initialRegion={location}  // Configura a região inicial do mapa com base na localização do estado
-        showsUserLocation={true}  // Mostra a localização atual do usuário no mapa
-      >
-        <Marker
-          coordinate={{
-            latitude: location.latitude,  // Usa a latitude do estado atual
-            longitude: location.longitude, // Usa a longitude do estado atual
-          }}
-          title="Você está aqui"  // Texto exibido ao clicar no marcador
-        />
+    <View style={styles.container}>
+      <MapView style={styles.map} initialRegion={location} showsUserLocation={true}>
+        <Marker coordinate={location} title="Você está aqui" />
       </MapView>
-      <Button title="Logout" onPress={() => auth().signOut()} />
-      {/* Botão de logout que desconecta o usuário ao ser pressionado */}
+      <Button title="Logout" onPress={handleLogout} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  map: { flex: 1 },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+});
