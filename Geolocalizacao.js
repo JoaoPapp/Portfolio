@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Button, ActivityIndicator, StyleSheet, Alert } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
-import auth from '@react-native-firebase/auth';
+import MapView, { Marker } from 'react-native-maps'; // Componente de mapa e marcador
+import Geolocation from '@react-native-community/geolocation'; // Biblioteca para obter geolocalização do usuário
+import auth from '@react-native-firebase/auth'; // Para logout
 
 export default function HomeScreen() {
   const [location, setLocation] = useState(null); // Inicia sem localização

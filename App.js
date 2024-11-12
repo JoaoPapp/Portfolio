@@ -1,8 +1,8 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import LoginScreen from './screens/LoginScreen';
-import HomeScreen from './screens/HomeScreen';
+import { NavigationContainer } from '@react-navigation/native'; // Contêiner que gerencia a navegação no app
+import { createStackNavigator } from '@react-navigation/stack'; // Criação de navegação por pilha
+import LoginScreen from './screens/LoginScreen'; // Importa a tela de login
+import HomeScreen from './screens/HomeScreen'; // Importa a tela inicial (home com mapa)
 
 const Stack = createStackNavigator();  // Inicializa o stack navigator
 

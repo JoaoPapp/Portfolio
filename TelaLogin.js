@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, ActivityIndicator, StyleSheet } from 'react-native';
-import auth from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth'; // Importa Firebase Authentication para login
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(''); // Estado para armazenar o email inserido pelo usuário
+  const [password, setPassword] = useState(''); // Estado para armazenar a senha inserida pelo usuário
   const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
@@ -19,11 +19,11 @@ export default function LoginScreen({ navigation }) {
       .signInWithEmailAndPassword(email, password)
       .then(() => {
         setLoading(false);
-        navigation.replace('Home');
+        navigation.replace('Home'); // Navega para a tela Home (mapa) após o login bem-sucedido
       })
       .catch(error => {
         setLoading(false);
-        Alert.alert('Erro', error.message);
+        Alert.alert('Erro', error.message); // Exibe erros de login no console (credenciais incorretas)
       });
   };
 
