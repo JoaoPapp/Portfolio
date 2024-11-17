@@ -1,4 +1,3 @@
-(Documentação ainda ocorrerá mudanças, esse não é a documentação final)
 # Portfolio
 
 # Capa
@@ -30,7 +29,7 @@ A proposta do projeto é criar uma solução tecnológica acessível e intuitiva
 O diferencial do projeto está em seu foco local, com a intenção de promover a solidariedade e o compartilhamento entre vizinhos, empresas e pequenos estabelecimentos, garantindo que alimentos não sejam desperdiçados. O sistema de agendamento de coleta torna o processo mais flexível, permitindo que doadores e receptores ajustem os horários de acordo com sua conveniência.
 
 # Tecnologias utilizadas
-## Frontend
+  ## Frontend
 * React Native: Framework para desenvolvimento mobile, usado para criar as interfaces e funcionalidades interativas do aplicativo.
 * React Navigation: Biblioteca de navegação para React Native.
 * Google Maps API: API de mapas que oferece visualização de mapas interativos e serviços de geolocalização.
@@ -43,3 +42,44 @@ O diferencial do projeto está em seu foco local, com a intenção de promover a
 * Firebase Firestore: Banco de dados NoSQL em tempo real da plataforma Firebase.
 * Firebase Cloud Messaging (FCM): Serviço de envio de notificações push da Firebase.
 * Google Maps API (Geocoding e Places API): Além de renderizar mapas no front-end, também pode ser usada no back-end para transformar endereços em coordenadas geográficas (geocoding) ou para buscar lugares.
+
+# 3. Objetivos
+  ## Objetivo Geral
+  Desenvolver um aplicativo móvel que conecte doadores e receptores de alimentos excedentes, promovendo a solidariedade comunitária e a redução do desperdício alimentar.
+
+  ## Objetivos Específicos
+*  Implementar uma interface intuitiva para cadastro e visualização de doações.
+*  Utilizar geolocalização para identificar doações próximas ao usuário.
+*  Garantir segurança no gerenciamento de dados com Firebase Authentication e Firestore.
+*  Proporcionar feedback em tempo real por meio de notificações e atualizações dinâmicas.
+*  Facilitar o agendamento de coletas entre doadores e receptores.
+
+#  4. Funcionalidades do Aplicativo
+* Autenticação de Usuários
+  Login e registro com email e senha.
+  Validação de campos e feedback para erros.
+
+* Cadastro de Doações
+  Formulário para inserção de informações detalhadas sobre os alimentos.
+  Salvamento no Firebase Firestore com vinculação ao doador.
+
+* Mapa Interativo
+  Exibição de doações próximas utilizando geolocalização.
+  Marcadores interativos com detalhes sobre cada doação.
+
+* Notificações
+  Envio de notificações push quando novas doações são cadastradas.
+
+* Agendamento de Coletas
+  Agendamento flexível entre doadores e receptores, diretamente no aplicativo.
+
+* Histórico
+  Histórico de doações realizadas e recebidas, permitindo aos usuários acompanhar suas interações.
+
+# 5. Resultados Esperados
+* Um aplicativo funcional que conecta doadores e receptores de alimentos em tempo real.
+* Interface amigável e intuitiva para fácil adoção pela comunidade.
+* Contribuição prática para a redução do desperdício de alimentos e apoio a quem mais precisa.
+
+# 6. Conclusão
+O Aplicativo de Doação de Alimentos com Geolocalização apresenta uma solução inovadora para combater o desperdício de alimentos e apoiar comunidades locais. Combinando tecnologias modernas e um propósito social, o projeto busca promover a solidariedade e a sustentabilidade, criando um impacto positivo nas regiões em que for implementado.
