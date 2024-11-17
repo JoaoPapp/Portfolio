@@ -1,67 +1,42 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, ActivityIndicator, StyleSheet } from 'react-native';
-import auth from '@react-native-firebase/auth'; // Importa Firebase Authentication para login
+import { View, Text, TextInput, Button } from 'react-native';
+import auth from '@react-native-firebase/auth';  // Importa Firebase Authentication para login
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState(''); // Estado para armazenar o email inserido pelo usuário
+  const [email, setEmail] = useState('');      // Estado para armazenar o email inserido pelo usuário
   const [password, setPassword] = useState(''); // Estado para armazenar a senha inserida pelo usuário
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
-      return;
-    }
-
-    setLoading(true); // Ativa o loading
-
+    // Função que lida com o login no Firebase
     auth()
-      .signInWithEmailAndPassword(email, password)
+      .signInWithEmailAndPassword(email, password) // Faz login com email e senha usando Firebase
       .then(() => {
-        setLoading(false);
         navigation.replace('Home'); // Navega para a tela Home (mapa) após o login bem-sucedido
       })
       .catch(error => {
-        setLoading(false);
-        Alert.alert('Erro', error.message); // Exibe erros de login no console (credenciais incorretas)
+        console.error(error); // Exibe erros de login no console (credenciais incorretas, por exemplo)
       });
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Email</Text>
+    <View>
+      <Text>Email</Text>
       <TextInput 
-        style={styles.input} 
         value={email} 
         onChangeText={setEmail} 
         placeholder="Digite seu email" 
-        keyboardType="email-address" 
       />
-      <Text style={styles.label}>Senha</Text>
+      {/* Campo de entrada para o email */}
+      <Text>Password</Text>
       <TextInput 
-        style={styles.input} 
         value={password} 
         onChangeText={setPassword} 
         secureTextEntry 
         placeholder="Digite sua senha" 
       />
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : (
-        <Button title="Login" onPress={handleLogin} />
-      )}
+      {/* Campo de entrada para a senha, protegido */}
+      <Button title="Login" onPress={handleLogin} />
+      {/* Botão que chama a função handleLogin quando pressionado */}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  label: { marginBottom: 8, fontSize: 18 },
-  input: { 
-    borderWidth: 1, 
-    borderColor: '#ddd', 
-    marginBottom: 12, 
-    padding: 8, 
-    borderRadius: 5 
-  },
-});
