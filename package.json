@@ -2,7 +2,8 @@
   "dependencies": {
     "@react-native-firebase/app": "^21.6.1",
     "expo": "^52.0.14",
-    "react-native": "^0.76.3"
+    "react-native": "^0.76.3",
+    "react-native-maps": "^1.20.1"
   },
   "devDependencies": {
     "@react-native-community/cli": "^15.1.2",
