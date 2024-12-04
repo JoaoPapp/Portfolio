@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@react-native-firebase/app": "^21.6.1",
+    "expo": "^52.0.14",
     "react-native": "^0.76.3"
   },
   "devDependencies": {
