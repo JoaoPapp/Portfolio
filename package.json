@@ -5,6 +5,8 @@
     "react-native": "^0.76.3"
   },
   "devDependencies": {
-    "@react-native-community/cli": "^15.1.2"
+    "@react-native-community/cli": "^15.1.2",
+    "@types/react": "~18.3.12",
+    "typescript": "^5.3.3"
   }
 }
