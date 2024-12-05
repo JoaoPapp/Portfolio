@@ -1,24 +1,9 @@
 {
-  "name": "portfolio",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "dependencies": {
+    "expo": "^52.0.17"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/JoaoPapp/Portfolio.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/JoaoPapp/Portfolio/issues"
-  },
-  "homepage": "https://github.com/JoaoPapp/Portfolio#readme",
-  "description": ""
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/react": "~18.3.12"
+  }
 }
