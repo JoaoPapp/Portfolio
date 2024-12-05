@@ -4,8 +4,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import LoginScreen from './tela-login';
+import GeolocationScreen from './Geolocalizacao'; 
 
-// Adicione o firebaseConfig gerado no console do Firebase
+// Configuração do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAe5xP5lG5N6Yvte2AbYaPxScfmW3_ujX4",
   authDomain: "portifolio-776ea.firebaseapp.com",
@@ -25,12 +26,19 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
+        {/* Tela de Login */}
         <Stack.Screen 
           name="Login" 
           component={LoginScreen} 
           options={{ title: 'Tela de Login' }} 
         />
-        {/* Adicione outras telas aqui conforme necessário */}
+        
+        {/* Tela de Geolocalização */}
+        <Stack.Screen 
+          name="Geolocalizacao" 
+          component={GeolocationScreen} 
+          options={{ title: 'Geolocalização' }} 
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

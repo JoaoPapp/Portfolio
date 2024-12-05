@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, Text } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from './App'; // Importa o Firestore inicializado no App.tsx
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) { // Adiciona navigation como parâmetro
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true); // Alterna entre Login e Cadastro
@@ -23,7 +23,7 @@ export default function LoginScreen() {
         createdAt: new Date(),
       });
 
-      Alert.alert('Usuario criado com sucesso!');
+      Alert.alert('Sucesso', 'Usuário criado e salvo no banco de dados!');
     } catch (error) {
       Alert.alert('Erro', error.message);
     }
@@ -35,7 +35,8 @@ export default function LoginScreen() {
     try {
       // Faz login com Firebase Authentication
       await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert('Login realizado com sucesso!');
+      Alert.alert('Sucesso', 'Login realizado com sucesso!');
+      navigation.navigate('Geolocalizacao'); 
     } catch (error) {
       Alert.alert('Erro', error.message);
     }
@@ -43,6 +44,7 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>ShareFood</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -58,7 +60,6 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         secureTextEntry
       />
-
       {isLogin ? (
         <Button title="Entrar" onPress={handleLogin} />
       ) : (
@@ -80,6 +81,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 16,
+    backgroundColor: '#fff',
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#4CAF50', 
   },
   input: {
     borderWidth: 1,
