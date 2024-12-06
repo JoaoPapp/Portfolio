@@ -6,6 +6,7 @@ import { getFirestore } from 'firebase/firestore';
 import LoginScreen from './tela-login';
 import GeolocationScreen from './Geolocalizacao';
 import CadastroAlimentos from './CadastroAlimentos';
+import ReceberScreen from './ReceberAlimentos'; 
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -46,6 +47,13 @@ export default function App() {
           name="CadastroAlimentos" 
           component={CadastroAlimentos} 
           options={{ title: 'Cadastrar Alimento' }} 
+        />
+
+        {/* Tela de Receber */}
+        <Stack.Screen 
+          name="Receber" 
+          component={ReceberScreen} 
+          options={{ title: 'Receber Alimentos' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>
