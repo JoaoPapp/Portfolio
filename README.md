@@ -2,7 +2,7 @@
 
 # Capa
 
-- **Título do Projeto**: Aplicativo de Doação de Alimentos com Geolocalização
+- **Título do Projeto**: ShareFood - Aplicativo de Doação de Alimentos com Geolocalização
 - **Nome do Acadêmico**: João Pedro Papp
 - **Curso**: Engenharia de Software.
 
