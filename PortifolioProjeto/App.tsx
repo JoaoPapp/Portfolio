@@ -4,7 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import LoginScreen from './tela-login';
-import GeolocationScreen from './Geolocalizacao'; 
+import GeolocationScreen from './Geolocalizacao';
+import CadastroAlimentos from './CadastroAlimentos';
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -38,6 +39,13 @@ export default function App() {
           name="Geolocalizacao" 
           component={GeolocationScreen} 
           options={{ title: 'Geolocalização' }} 
+        />
+
+        {/* Tela de Cadastro de Alimentos */}
+        <Stack.Screen 
+          name="CadastroAlimentos" 
+          component={CadastroAlimentos} 
+          options={{ title: 'Cadastrar Alimento' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>
