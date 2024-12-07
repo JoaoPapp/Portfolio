@@ -3,13 +3,20 @@ import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from './App'; // Importa o Firestore inicializado no App.tsx
+import { CheckBox } from 'react-native-elements'; // Biblioteca para o checkbox
 
-export default function LoginScreen({ navigation }) { // Adiciona navigation como parâmetro
+export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true); // Alterna entre Login e Cadastro
+  const [agree, setAgree] = useState(false); // Para aceitar os termos e política de privacidade
 
   const handleSignUp = async () => {
+    if (!agree) {
+      Alert.alert('Atenção', 'Você deve aceitar os Termos e a Política de Privacidade antes de criar sua conta.');
+      return;
+    }
+
     const auth = getAuth();
 
     try {
@@ -24,6 +31,7 @@ export default function LoginScreen({ navigation }) { // Adiciona navigation com
       });
 
       Alert.alert('Sucesso', 'Usuário criado e salvo no banco de dados!');
+      setIsLogin(true); // Retorna para o modo login após criar a conta
     } catch (error) {
       Alert.alert('Erro', error.message);
     }
@@ -60,6 +68,21 @@ export default function LoginScreen({ navigation }) { // Adiciona navigation com
         onChangeText={setPassword}
         secureTextEntry
       />
+      {!isLogin && ( // Exibe o checkbox e link para a política de privacidade apenas no modo de cadastro
+        <>
+          <CheckBox
+            title="Eu concordo com os Termos e Política de Privacidade"
+            checked={agree}
+            onPress={() => setAgree(!agree)}
+          />
+          <Text
+            style={styles.link}
+            onPress={() => navigation.navigate('PoliticaPrivacidade')} // Navega para a tela de Política de Privacidade
+          >
+            Leia a Política de Privacidade
+          </Text>
+        </>
+      )}
       {isLogin ? (
         <Button title="Entrar" onPress={handleLogin} />
       ) : (
@@ -88,7 +111,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
-    color: '#4CAF50', 
+    color: '#4CAF50',
   },
   input: {
     borderWidth: 1,
@@ -101,6 +124,13 @@ const styles = StyleSheet.create({
     color: 'blue',
     marginTop: 16,
     textAlign: 'center',
+    textDecorationLine: 'underline',
+  },
+  link: {
+    color: 'blue',
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 10,
     textDecorationLine: 'underline',
   },
 });

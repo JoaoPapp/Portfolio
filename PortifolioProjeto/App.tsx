@@ -6,7 +6,8 @@ import { getFirestore } from 'firebase/firestore';
 import LoginScreen from './tela-login';
 import GeolocationScreen from './Geolocalizacao';
 import CadastroAlimentos from './CadastroAlimentos';
-import ReceberScreen from './ReceberAlimentos'; 
+import ReceberScreen from './ReceberAlimentos';
+import PoliticaPrivacidade from './PoliticaPrivacidade'; 
 
 // Configuração do Firebase
 const firebaseConfig = {
@@ -34,7 +35,14 @@ export default function App() {
           component={LoginScreen} 
           options={{ title: 'Tela de Login' }} 
         />
-        
+
+        {/* Tela de Política de Privacidade */}
+        <Stack.Screen 
+          name="PoliticaPrivacidade" 
+          component={PoliticaPrivacidade} 
+          options={{ title: 'Política de Privacidade' }} 
+        />
+
         {/* Tela de Geolocalização */}
         <Stack.Screen 
           name="Geolocalizacao" 
@@ -49,7 +57,7 @@ export default function App() {
           options={{ title: 'Cadastrar Alimento' }} 
         />
 
-        {/* Tela de Receber */}
+        {/* Tela de Receber Alimentos */}
         <Stack.Screen 
           name="Receber" 
           component={ReceberScreen} 
