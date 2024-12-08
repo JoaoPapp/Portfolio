@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAuth, browserLocalPersistence } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID, FIREBASE_STORAGE_BUCKET, FIREBASE_MESSAGING_SENDER_ID, FIREBASE_APP_ID } from '@env';
 import LoginScreen from './tela-login';
@@ -13,7 +13,7 @@ import ReceberScreen from './ReceberAlimentos';
 import PoliticaPrivacidade from './PoliticaPrivacidade';
 import ChatScreen from './Tela-Chat';
 
-// Adicionando console.log para testar se a chave da API está sendo carregada
+// Verificação de API para depuração
 console.log('FIREBASE_API_KEY:', FIREBASE_API_KEY);
 
 // Configuração do Firebase usando variáveis do .env
@@ -29,9 +29,10 @@ const firebaseConfig = {
 // Inicialize o Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Inicialize o Firebase Auth com memória local como fallback
-const auth = getAuth(app);
-auth.setPersistence(browserLocalPersistence); // Define a persistência local como alternativa
+// Inicialize o Firebase Auth com persistência via AsyncStorage
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 
 // Inicialize o Firestore
 export const db = getFirestore(app);
