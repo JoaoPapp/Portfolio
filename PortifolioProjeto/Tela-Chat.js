@@ -25,7 +25,7 @@ export default function ChatScreen({ route }) {
       }
     );
 
-    return () => unsubscribe(); // Limpar listener quando o componente desmonta
+    return () => unsubscribe(); 
   }, [chatId]);
 
   const handleSend = async () => {
