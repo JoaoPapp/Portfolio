@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, Button } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Circle } from 'react-native-maps';
 import { collection, getDocs } from 'firebase/firestore';
 import * as Location from 'expo-location';
 import { db } from './App';
@@ -71,6 +71,8 @@ export default function ReceberScreen() {
 
     if (nearbyDoacoes.length === 0) {
       Alert.alert('Nenhum Resultado', 'Não há doações próximas para os alimentos selecionados.');
+    } else {
+      Alert.alert('Doações Próximas', 'Há doações dentro do raio de 10 km.');
     }
 
     setFilteredDoacoes(nearbyDoacoes);
@@ -123,29 +125,16 @@ export default function ReceberScreen() {
               }}
               showsUserLocation={true}
             >
-              {filteredDoacoes.map((doacao) => (
-                <Marker
-                  key={doacao.id}
-                  coordinate={{
-                    latitude: doacao.latitude,
-                    longitude: doacao.longitude,
-                  }}
-                  title={doacao.nome}
-                  description={doacao.descricao}
-                />
-              ))}
+              {/* Adiciona um círculo para marcar o raio de 10 km */}
+              <Circle
+                center={location}
+                radius={10000} // Raio de 10 km
+                strokeWidth={2}
+                strokeColor="#00FF00"
+                fillColor="rgba(0,255,0,0.2)"
+              />
             </MapView>
           )}
-          <FlatList
-            data={filteredDoacoes}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.item}>
-                <Text style={styles.itemTitle}>{item.nome}</Text>
-                <Text>{item.descricao}</Text>
-              </View>
-            )}
-          />
         </>
       )}
     </View>
@@ -183,14 +172,5 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '50%',
     marginBottom: 16,
-  },
-  item: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  itemTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 });
