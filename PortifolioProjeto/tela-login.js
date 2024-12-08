@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextWrapper, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { db } from './App'; // Importa o Firestore inicializado no App.tsx
 import { CheckBox } from 'react-native-elements'; // Biblioteca para o checkbox
 
 export default function LoginScreen({ navigation }) {
+  const [name, setName] = useState(''); // Adiciona o estado para o nome
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true); // Alterna entre Login e Cadastro
@@ -14,6 +15,11 @@ export default function LoginScreen({ navigation }) {
   const handleSignUp = async () => {
     if (!agree) {
       Alert.alert('Atenção', 'Você deve aceitar os Termos e a Política de Privacidade antes de criar sua conta.');
+      return;
+    }
+
+    if (!name.trim()) {
+      Alert.alert('Erro', 'Por favor, insira seu nome.');
       return;
     }
 
@@ -26,6 +32,7 @@ export default function LoginScreen({ navigation }) {
 
       // Salva os dados no Firestore
       await setDoc(doc(db, 'users', user.uid), {
+        name: name.trim(),
         email: user.email,
         createdAt: new Date(),
       });
@@ -44,7 +51,7 @@ export default function LoginScreen({ navigation }) {
       // Faz login com Firebase Authentication
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert('Sucesso', 'Login realizado com sucesso!');
-      navigation.navigate('Geolocalizacao'); 
+      navigation.navigate('Geolocalizacao');
     } catch (error) {
       Alert.alert('Erro', error.message);
     }
@@ -53,6 +60,14 @@ export default function LoginScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>ShareFood</Text>
+      {!isLogin && ( // Exibe o campo de nome apenas no modo de cadastro
+        <TextInput
+          style={styles.input}
+          placeholder="Nome"
+          value={name}
+          onChangeText={setName}
+        />
+      )}
       <TextInput
         style={styles.input}
         placeholder="Email"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TextWrapper, ScrollView, StyleSheet, Button } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Button } from 'react-native';
 
 export default function PoliticaPrivacidade({ navigation }) {
   return (

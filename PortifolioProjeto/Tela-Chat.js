@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet,} from 'react-native';
 import { collection, doc, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './App'; // Firestore inicializado no App.tsx
+import { db } from './App';
 
 export default function ChatScreen({ route }) {
-  const { chatId, donorName, receiverName } = route.params; // Parâmetros passados para a tela
+  const { chatId, donorName, receiverName } = route.params;
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);

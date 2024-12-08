@@ -3,7 +3,18 @@
   "compilerOptions": {
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "allowJs": true ,
-    "strict": true
-  }
+    "allowJs": true,
+    "strict": true,
+    "jsx": "react",
+    "lib": ["esnext"],
+    "skipLibCheck": true
+  },
+  "include": [
+    "./**/*", 
+    "@env.d.ts" 
+  ],
+  "exclude": [
+    "node_modules",
+    "node_modules/expo/node_modules"
+  ]
 }
