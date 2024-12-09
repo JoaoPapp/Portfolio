@@ -36,12 +36,12 @@ export default function ChatScreen({ route }) {
 
       // Adiciona a nova mensagem no Firestore
       await addDoc(collection(chatRef, 'messages'), {
-        sender: receiverName, // Nome do remetente
+        sender: receiverName,
         text: newMessage,
         timestamp: serverTimestamp(),
       });
 
-      setNewMessage(''); // Limpar campo de entrada
+      setNewMessage('');
     } catch (error) {
       console.error('Erro ao enviar mensagem: ', error);
     }
