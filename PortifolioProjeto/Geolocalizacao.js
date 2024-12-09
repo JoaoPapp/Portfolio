@@ -76,7 +76,7 @@ export default function GeolocationScreen({ navigation }) {
           longitude: location.longitude,
           timestamp: new Date(),
         });
-        navigation.navigate('CadastroAlimentos'); // Navegar para a tela de cadastro
+        navigation.navigate('CadastroAlimentos'); // Navegar para a tela de CadastroAlimentos
       } catch (error) {
         Alert.alert('Erro', 'Erro ao salvar localização: ' + error.message);
       }
@@ -86,7 +86,7 @@ export default function GeolocationScreen({ navigation }) {
   };
 
   const handleReceber = () => {
-    navigation.navigate('Receber'); // Navegar para a tela ReceberScreen
+    navigation.navigate('Receber'); // Navegar para a tela ReceberAlimentos
   };
 
   return (
