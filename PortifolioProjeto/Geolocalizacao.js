@@ -11,6 +11,8 @@ export default function GeolocationScreen({ navigation }) {
   const [loading, setLoading] = useState(true); // Indica se a localização está carregando
 
   useEffect(() => {
+    let locationSubscription;
+
     (async () => {
       try {
         // Solicitar permissão para acessar a localização
@@ -21,33 +23,48 @@ export default function GeolocationScreen({ navigation }) {
           return;
         }
 
-        // Obter a localização atual
-        let loc = await Location.getCurrentPositionAsync({});
-        setLocation({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        });
+        // Observar mudanças na localização
+        locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 5 * 60 * 1000, // Atualiza a cada 5 minutos (em milissegundos)
+            distanceInterval: 10, // Ou quando o usuário se move 10 metros
+          },
+          (loc) => {
+            setLocation({
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            });
 
-        // Fazer a geocodificação reversa para obter o endereço
-        const geocode = await Location.reverseGeocodeAsync({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-        });
-
-        if (geocode.length > 0) {
-          const { city, region, country } = geocode[0];
-          setAddress(`${city}, ${region}, ${country}`);
-        } else {
-          setAddress('Endereço não encontrado');
-        }
+            // Fazer a geocodificação reversa para obter o endereço
+            Location.reverseGeocodeAsync({
+              latitude: loc.coords.latitude,
+              longitude: loc.coords.longitude,
+            }).then((geocode) => {
+              if (geocode.length > 0) {
+                const { city, region, country } = geocode[0];
+                setAddress(`${city}, ${region}, ${country}`);
+              } else {
+                setAddress('Endereço não encontrado');
+              }
+            });
+          }
+        );
       } catch (error) {
         Alert.alert('Erro', 'Erro ao obter localização: ' + error.message);
       } finally {
         setLoading(false);
       }
     })();
+
+    // Limpeza para parar de observar a localização quando o componente for desmontado
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+      }
+    };
   }, []);
 
   const handleDoar = async () => {
