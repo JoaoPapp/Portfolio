@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet,} from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { collection, doc, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './App';
 
@@ -10,7 +10,6 @@ export default function ChatScreen({ route }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Escuta em tempo real as mensagens do Firestore
     const unsubscribe = onSnapshot(
       doc(db, 'chats', chatId),
       (snapshot) => {
@@ -25,7 +24,7 @@ export default function ChatScreen({ route }) {
       }
     );
 
-    return () => unsubscribe(); 
+    return () => unsubscribe();
   }, [chatId]);
 
   const handleSend = async () => {
@@ -34,7 +33,6 @@ export default function ChatScreen({ route }) {
     try {
       const chatRef = doc(db, 'chats', chatId);
 
-      // Adiciona a nova mensagem no Firestore
       await addDoc(collection(chatRef, 'messages'), {
         sender: receiverName,
         text: newMessage,
@@ -49,6 +47,13 @@ export default function ChatScreen({ route }) {
 
   return (
     <View style={styles.container}>
+      {/* Mensagem de Segurança */}
+      <View style={styles.safetyMessageContainer}>
+        <Text style={styles.safetyMessageText}>
+        Para sua segurança, o ShareFood recomenda que tanto o doador quanto o receptor se encontrem em locais públicos, como supermercados, postos de gasolina e praças, preferencialmente durante o dia, nos horários da manhã ou da tarde. Além disso, evitem divulgar informações pessoais, como endereço e número de telefone.
+        </Text>
+      </View>
+
       <Text style={styles.title}>Chat entre {donorName} e {receiverName}</Text>
       {loading ? (
         <Text>Carregando mensagens...</Text>
@@ -90,6 +95,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 16,
+  },
+  safetyMessageContainer: {
+    backgroundColor: '#FFCC00',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  safetyMessageText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#000',
   },
   title: {
     fontSize: 18,
