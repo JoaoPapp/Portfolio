@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from './App'; // Certifique-se de exportar o `auth` do App.tsx
 
 export default function ChatScreen({ route }) {
   const { chatId, donorName, receiverName } = route.params || {};
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
+  const [status, setStatus] = useState('pendente'); // Status inicial
   const currentUser = auth.currentUser;
 
-  // Obter nome do remetente a partir do ID do usuário
-  const fetchUserName = async (userId) => {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      if (userDoc.exists()) {
-        return userDoc.data().name || 'Anônimo';
+  // Obter o status atual da doação
+  useEffect(() => {
+    const chatDocRef = doc(db, 'chats', chatId);
+    const unsubscribe = onSnapshot(chatDocRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setStatus(snapshot.data().status || 'pendente');
       }
-    } catch (error) {
-      console.error('Erro ao buscar o nome do usuário:', error);
-    }
-    return 'Anônimo';
-  };
+    });
+
+    return () => unsubscribe();
+  }, [chatId]);
 
   // Escutar mensagens em tempo real
   useEffect(() => {
@@ -30,15 +30,9 @@ export default function ChatScreen({ route }) {
     }
 
     const messagesRef = collection(db, 'chats', chatId, 'messages');
-    const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc')); // Ordenar por data/hora
-    const unsubscribe = onSnapshot(messagesQuery, async (snapshot) => {
-      const loadedMessages = await Promise.all(
-        snapshot.docs.map(async (doc) => {
-          const message = doc.data();
-          message.senderName = await fetchUserName(message.senderId); // Buscar nome do remetente
-          return { id: doc.id, ...message };
-        })
-      );
+    const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const loadedMessages = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setMessages(loadedMessages);
     });
 
@@ -52,7 +46,7 @@ export default function ChatScreen({ route }) {
     try {
       const messagesRef = collection(db, 'chats', chatId, 'messages');
       await addDoc(messagesRef, {
-        senderId: currentUser.uid, // Identifica o ID do remetente
+        senderId: currentUser.uid,
         text: newMessage,
         timestamp: serverTimestamp(),
       });
@@ -60,6 +54,28 @@ export default function ChatScreen({ route }) {
     } catch (error) {
       console.error('Erro ao enviar mensagem:', error);
       Alert.alert('Erro', 'Não foi possível enviar a mensagem.');
+    }
+  };
+
+  // Confirmar entrega (doador)
+  const handleConfirmDelivery = async () => {
+    try {
+      const chatDocRef = doc(db, 'chats', chatId);
+      await updateDoc(chatDocRef, { status: 'entregue' });
+      Alert.alert('Confirmação', 'Você confirmou a entrega do produto.');
+    } catch (error) {
+      console.error('Erro ao confirmar entrega:', error);
+    }
+  };
+
+  // Confirmar recebimento (receptor)
+  const handleConfirmReceipt = async () => {
+    try {
+      const chatDocRef = doc(db, 'chats', chatId);
+      await updateDoc(chatDocRef, { status: 'concluído' });
+      Alert.alert('Confirmação', 'Você confirmou o recebimento do produto.');
+    } catch (error) {
+      console.error('Erro ao confirmar recebimento:', error);
     }
   };
 
@@ -86,6 +102,27 @@ export default function ChatScreen({ route }) {
       <Text style={styles.title}>
         Chat entre {donorName} e {receiverName}
       </Text>
+
+      {/* Status da Doação */}
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusText}>
+          Status da Doação: {status === 'pendente'
+            ? 'Pendente'
+            : status === 'entregue'
+            ? 'Entregue pelo Doador'
+            : 'Concluído'}
+        </Text>
+        {currentUser.email === donorName && status === 'pendente' && (
+          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmDelivery}>
+            <Text style={styles.confirmButtonText}>Confirmar Entrega</Text>
+          </TouchableOpacity>
+        )}
+        {currentUser.email === receiverName && status === 'entregue' && (
+          <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmReceipt}>
+            <Text style={styles.confirmButtonText}>Confirmar Recebimento</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       <FlatList
         data={messages}
@@ -143,6 +180,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10,
   },
+  statusContainer: {
+    backgroundColor: '#E0E0E0',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  confirmButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 5,
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   messagesContainer: {
     flexGrow: 1,
   },
@@ -189,10 +248,5 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: '#fff',
     fontWeight: 'bold',
-  },
-  errorText: {
-    fontSize: 16,
-    color: 'red',
-    textAlign: 'center',
   },
 });
