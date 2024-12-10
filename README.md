@@ -32,16 +32,13 @@ O diferencial do projeto está em seu foco local, com a intenção de promover a
   ## Frontend
 * React Native: Framework para desenvolvimento mobile, usado para criar as interfaces e funcionalidades interativas do aplicativo.
 * React Navigation: Biblioteca de navegação para React Native.
-* Google Maps API: API de mapas que oferece visualização de mapas interativos e serviços de geolocalização.
 * React Native Maps: Componente de mapa para React Native que usa o Google Maps.
-* Geolocation API: API para obter a localização atual do usuário em tempo real.
 * React Native Permissions: Biblioteca para solicitar permissões de acesso a recursos do dispositivo, como geolocalização.
 
   ## Backend
 * Firebase Authentication: Serviço de autenticação oferecido pelo Firebase.
 * Firebase Firestore: Banco de dados NoSQL em tempo real da plataforma Firebase.
 * Firebase Cloud Messaging (FCM): Serviço de envio de notificações push da Firebase.
-* Google Maps API (Geocoding e Places API): Além de renderizar mapas no front-end, também pode ser usada no back-end para transformar endereços em coordenadas geográficas (geocoding) ou para buscar lugares.
 
 # 3. Objetivos
   ## Objetivo Geral
@@ -56,8 +53,9 @@ O diferencial do projeto está em seu foco local, com a intenção de promover a
 
 #  4. Funcionalidades do Aplicativo
 * Autenticação de Usuários
-  Login e registro com email e senha.
+  Login e registro com nome, email e senha.
   Validação de campos e feedback para erros.
+  Aceitar os termos 
 
 * Cadastro de Doações
   Formulário para inserção de informações detalhadas sobre os alimentos.
@@ -66,9 +64,6 @@ O diferencial do projeto está em seu foco local, com a intenção de promover a
 * Mapa Interativo
   Exibição de doações próximas utilizando geolocalização.
   Marcadores interativos com detalhes sobre cada doação.
-
-* Notificações
-  Envio de notificações push quando novas doações são cadastradas.
 
 * Agendamento de Coletas
   Agendamento flexível entre doadores e receptores, diretamente no aplicativo.
