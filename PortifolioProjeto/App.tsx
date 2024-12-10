@@ -12,6 +12,7 @@ import CadastroAlimentos from './CadastroAlimentos';
 import ReceberScreen from './ReceberAlimentos';
 import PoliticaPrivacidade from './PoliticaPrivacidade';
 import ChatScreen from './Tela-Chat';
+import ProductsScreen from './Tela-Produtos';
 
 // Verificação de API para depuração
 console.log('FIREBASE_API_KEY:', FIREBASE_API_KEY);
@@ -69,6 +70,11 @@ export default function App() {
           name="Receber" 
           component={ReceberScreen} 
           options={{ title: 'Receber Alimentos' }} 
+        />
+        <Stack.Screen 
+          name="Products" 
+          component={ProductsScreen} 
+          options={{ title: 'Produtos Disponíveis' }} 
         />
         <Stack.Screen 
           name="Chat" 

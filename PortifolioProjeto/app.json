@@ -20,10 +20,16 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff",
         "package": "com.portifolio.app"
-      }
+      },
+      "package": "com.joao.papp.PortifolioProjeto"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4a2128c9-8001-4e36-88a5-79d750d1cfc9"
+      }
     }
   }
 }

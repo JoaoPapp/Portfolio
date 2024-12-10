@@ -1,29 +1,48 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { collection, doc, onSnapshot, addDoc, serverTimestamp, updateDoc, getDoc } from 'firebase/firestore';
-import { db } from './App';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { auth, db } from './App'; // Certifique-se de exportar o `auth` do App.tsx
 
 export default function ChatScreen({ route }) {
-  const { chatId, donorName, receiverName } = route.params;
+  const { chatId, donorName, receiverName } = route.params || {};
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [donationStatus, setDonationStatus] = useState('pendente'); // Status inicial
+  const currentUser = auth.currentUser;
 
-  // Obter mensagens e status da doação
-  useEffect(() => {
-    const chatRef = doc(db, 'chats', chatId);
-
-    // Escutar mudanças nas mensagens
-    const unsubscribeMessages = onSnapshot(chatRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setMessages(snapshot.data().messages || []);
-        setDonationStatus(snapshot.data().status || 'pendente');
+  // Obter nome do remetente a partir do ID do usuário
+  const fetchUserName = async (userId) => {
+    try {
+      const userDoc = await getDoc(doc(db, 'users', userId));
+      if (userDoc.exists()) {
+        return userDoc.data().name || 'Anônimo';
       }
-      setLoading(false);
+    } catch (error) {
+      console.error('Erro ao buscar o nome do usuário:', error);
+    }
+    return 'Anônimo';
+  };
+
+  // Escutar mensagens em tempo real
+  useEffect(() => {
+    if (!chatId) {
+      Alert.alert('Erro', 'ID do chat não fornecido.');
+      return;
+    }
+
+    const messagesRef = collection(db, 'chats', chatId, 'messages');
+    const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc')); // Ordenar por data/hora
+    const unsubscribe = onSnapshot(messagesQuery, async (snapshot) => {
+      const loadedMessages = await Promise.all(
+        snapshot.docs.map(async (doc) => {
+          const message = doc.data();
+          message.senderName = await fetchUserName(message.senderId); // Buscar nome do remetente
+          return { id: doc.id, ...message };
+        })
+      );
+      setMessages(loadedMessages);
     });
 
-    return () => unsubscribeMessages();
+    return () => unsubscribe();
   }, [chatId]);
 
   // Enviar mensagem
@@ -31,91 +50,60 @@ export default function ChatScreen({ route }) {
     if (!newMessage.trim()) return;
 
     try {
-      const chatRef = doc(db, 'chats', chatId);
-
-      await addDoc(collection(chatRef, 'messages'), {
-        sender: receiverName,
+      const messagesRef = collection(db, 'chats', chatId, 'messages');
+      await addDoc(messagesRef, {
+        senderId: currentUser.uid, // Identifica o ID do remetente
         text: newMessage,
         timestamp: serverTimestamp(),
       });
-
       setNewMessage('');
     } catch (error) {
-      console.error('Erro ao enviar mensagem: ', error);
+      console.error('Erro ao enviar mensagem:', error);
+      Alert.alert('Erro', 'Não foi possível enviar a mensagem.');
     }
   };
 
-  // Confirmar recebimento do produto
-  const handleConfirmReceipt = async () => {
-    try {
-      const chatRef = doc(db, 'chats', chatId);
-
-      await updateDoc(chatRef, {
-        status: 'concluído', // Atualizar status da doação
-        receiptConfirmedAt: serverTimestamp(),
-      });
-
-      Alert.alert('Confirmação', 'Você confirmou o recebimento do produto.');
-    } catch (error) {
-      console.error('Erro ao confirmar recebimento:', error);
-    }
-  };
+  if (!chatId || !donorName || !receiverName) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Erro: Informações do chat estão incompletas.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       {/* Mensagem de Segurança */}
       <View style={styles.safetyMessageContainer}>
         <Text style={styles.safetyMessageText}>
-          Para sua segurança, o ShareFood recomenda que tanto o doador quanto o
-          receptor se encontrem em locais públicos, como supermercados, postos
-          de gasolina e praças, preferencialmente durante o dia. Além disso,
-          evitem divulgar informações pessoais, como endereço e número de
+          Para sua segurança, o ShareFood recomenda que tanto o doador quanto o receptor se encontrem
+          em locais públicos, como supermercados, postos de gasolina e praças, preferencialmente
+          durante o dia. Além disso, evitem divulgar informações pessoais, como endereço e número de
           telefone.
         </Text>
-      </View>
-
-      {/* Status da Doação */}
-      <View style={styles.statusContainer}>
-        <Text style={styles.statusText}>
-          Status da Doação: {donationStatus === 'pendente'
-            ? 'Pendente'
-            : donationStatus === 'entregue'
-            ? 'Entregue pelo Doador'
-            : 'Concluído'}
-        </Text>
-        {donationStatus === 'entregue' && (
-          <TouchableOpacity
-            style={styles.confirmButton}
-            onPress={handleConfirmReceipt}
-          >
-            <Text style={styles.confirmButtonText}>Confirmar Recebimento</Text>
-          </TouchableOpacity>
-        )}
       </View>
 
       <Text style={styles.title}>
         Chat entre {donorName} e {receiverName}
       </Text>
-      {loading ? (
-        <Text>Carregando mensagens...</Text>
-      ) : (
-        <FlatList
-          data={messages}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.message,
-                item.sender === receiverName ? styles.receiver : styles.sender,
-              ]}
-            >
-              <Text style={styles.senderName}>{item.sender}</Text>
-              <Text>{item.text}</Text>
-            </View>
-          )}
-          contentContainerStyle={styles.messagesContainer}
-        />
-      )}
+
+      <FlatList
+        data={messages}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View
+            style={[
+              styles.message,
+              item.senderId === currentUser.uid ? styles.sender : styles.receiver,
+            ]}
+          >
+            <Text style={styles.senderName}>{item.senderName}</Text>
+            <Text>{item.text}</Text>
+          </View>
+        )}
+        contentContainerStyle={styles.messagesContainer}
+      />
+
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
@@ -148,28 +136,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#000',
-  },
-  statusContainer: {
-    backgroundColor: '#E0E0E0',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  statusText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  confirmButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 5,
-    alignItems: 'center',
-  },
-  confirmButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   title: {
     fontSize: 18,
@@ -223,5 +189,10 @@ const styles = StyleSheet.create({
   sendButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
   },
 });

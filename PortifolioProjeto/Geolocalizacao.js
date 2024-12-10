@@ -6,9 +6,9 @@ import { collection, addDoc } from 'firebase/firestore';
 import { db } from './App';
 
 export default function GeolocationScreen({ navigation }) {
-  const [location, setLocation] = useState(null); // Armazena latitude e longitude
-  const [address, setAddress] = useState(null); // Armazena o endereço atual
-  const [loading, setLoading] = useState(true); // Indica se a localização está carregando
+  const [location, setLocation] = useState(null); 
+  const [address, setAddress] = useState(null); 
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
     let locationSubscription;
@@ -18,7 +18,7 @@ export default function GeolocationScreen({ navigation }) {
         // Solicitar permissão para acessar a localização
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permissão Negada', 'Permissão de localização negada');
+          Alert.alert('Permissão Negada', 'Permissão de localização negada.');
           setLoading(false);
           return;
         }
@@ -59,7 +59,6 @@ export default function GeolocationScreen({ navigation }) {
       }
     })();
 
-    // Limpeza para parar de observar a localização quando o componente for desmontado
     return () => {
       if (locationSubscription) {
         locationSubscription.remove();
@@ -81,12 +80,27 @@ export default function GeolocationScreen({ navigation }) {
         Alert.alert('Erro', 'Erro ao salvar localização: ' + error.message);
       }
     } else {
-      Alert.alert('Erro', 'Localização ainda não disponível');
+      Alert.alert('Erro', 'Localização ainda não disponível.');
     }
   };
 
   const handleReceber = () => {
+    if (!location) {
+      Alert.alert('Erro', 'Localização ainda não disponível.');
+      return;
+    }
     navigation.navigate('Receber'); // Navegar para a tela ReceberAlimentos
+  };
+
+  const handleProdutosDisponiveis = () => {
+    if (!location) {
+      Alert.alert('Erro', 'Localização ainda não disponível.');
+      return;
+    }
+    navigation.navigate('Products', {
+      latitude: location.latitude,
+      longitude: location.longitude,
+    }); // Navegar para a tela Tela-Produtos com parâmetros
   };
 
   return (
@@ -118,6 +132,11 @@ export default function GeolocationScreen({ navigation }) {
       <View style={styles.buttonContainer}>
         <Button title="Doar" onPress={handleDoar} color="#4CAF50" />
         <Button title="Receber" onPress={handleReceber} color="#2196F3" />
+        <Button
+          title="Produtos Disponíveis"
+          onPress={handleProdutosDisponiveis}
+          color="#FF9800"
+        />
       </View>
     </View>
   );
