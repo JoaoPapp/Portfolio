@@ -55,7 +55,7 @@ O diferencial do projeto está em seu foco local, com a intenção de promover a
 * Autenticação de Usuários
   Login e registro com nome, email e senha.
   Validação de campos e feedback para erros.
-  Aceitar os termos 
+  Aceitar os termos e Política de Privacidade.
 
 * Cadastro de Doações
   Formulário para inserção de informações detalhadas sobre os alimentos.
