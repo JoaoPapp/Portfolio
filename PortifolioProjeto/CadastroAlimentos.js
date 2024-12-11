@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, setDoc, doc } from 'firebase/firestore';
 import { auth, db } from './App';
 
 export default function CadastroAlimentos({ navigation }) {
@@ -69,7 +69,11 @@ export default function CadastroAlimentos({ navigation }) {
     setLoading(true);
 
     try {
-      await addDoc(collection(db, 'donations'), {
+      // Gerar um ID único para o productId
+      const productId = doc(collection(db, 'donations')).id;
+
+      await setDoc(doc(db, 'donations', productId), {
+        productId, // Inclui o productId gerado automaticamente
         nome,
         descricao,
         quantidade,

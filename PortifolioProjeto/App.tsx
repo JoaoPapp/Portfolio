@@ -13,6 +13,7 @@ import ReceberScreen from './ReceberAlimentos';
 import PoliticaPrivacidade from './PoliticaPrivacidade';
 import ChatScreen from './Tela-Chat';
 import ProductsScreen from './Tela-Produtos';
+import ChatListScreen from './lista-chat'; 
 
 // Verificação de API para depuração
 console.log('FIREBASE_API_KEY:', FIREBASE_API_KEY);
@@ -80,6 +81,11 @@ export default function App() {
           name="Chat" 
           component={ChatScreen} 
           options={{ title: 'Chat' }} 
+        />
+        <Stack.Screen 
+          name="ChatList" // Adicionando a nova rota para listagem de chats
+          component={ChatListScreen} 
+          options={{ title: 'Seus Chats' }} 
         />
       </Stack.Navigator>
     </NavigationContainer>

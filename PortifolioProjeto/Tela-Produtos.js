@@ -1,55 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore';
-import { db, auth } from './App'; // Certifique-se de exportar o auth do App.tsx
+import { collection, query, where, onSnapshot, getDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from './App';
 
 export default function ProductsScreen({ route, navigation }) {
-  const { latitude, longitude } = route.params || {}; // Recebe a localização atual
+  const { latitude, longitude } = route.params || {};
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-
-  const currentUserId = auth.currentUser?.uid; // Obtém o ID do usuário logado
-  const currentUserName = auth.currentUser?.displayName || 'Receptor'; // Nome do usuário logado
+  const currentUserId = auth.currentUser?.uid;
 
   const fetchUserName = async (userId) => {
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
-        return userDoc.data().name; // Retorna o nome do usuário
+        return userDoc.data().name || 'Anônimo';
       }
     } catch (error) {
-      console.error('Erro ao buscar o nome do usuário:', error);
+      console.error('Erro ao buscar o nome do doador:', error);
     }
-    return 'Anônimo'; // Retorno padrão se não encontrar o usuário
+    return 'Anônimo';
   };
 
   useEffect(() => {
     if (!latitude || !longitude) {
       Alert.alert('Erro', 'Localização atual não fornecida.');
-      navigation.goBack(); // Voltar para a tela anterior se não houver localização
       return;
     }
 
-    console.log('Localização recebida:', { latitude, longitude }); // Log para depuração
+    const productsRef = collection(db, 'donations');
+    const q = query(productsRef, where('status', '==', 'disponível'));
 
-    // Buscar doações do Firestore com status "disponível"
-    const q = query(collection(db, 'donations'), where('status', '==', 'disponível'));
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const fetchedProducts = await Promise.all(
         snapshot.docs.map(async (doc) => {
           const product = { id: doc.id, ...doc.data() };
-          product.donorName = await fetchUserName(product.userId); // Adiciona o nome do doador ao produto
+          product.donorName = await fetchUserName(product.userId); // Obter nome do doador
           return product;
         })
       );
-      console.log('Produtos recuperados do Firestore:', fetchedProducts); // Log de depuração
       setProducts(fetchedProducts);
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Filtrar produtos no raio de 10 km e remover os do usuário logado
   useEffect(() => {
     const haversineDistance = (lat1, lon1, lat2, lon2) => {
       const toRad = (angle) => (angle * Math.PI) / 180;
@@ -63,7 +57,7 @@ export default function ProductsScreen({ route, navigation }) {
           Math.sin(dLon / 2) *
           Math.sin(dLon / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c; // Distância em km
+      return R * c;
     };
 
     const filtered = products.filter((product) => {
@@ -75,17 +69,53 @@ export default function ProductsScreen({ route, navigation }) {
         product.longitude
       );
 
-      // Filtrar produtos no raio de 10 km e que não pertencem ao usuário logado
       return distance <= 10 && product.userId !== currentUserId;
     });
 
-    console.log('Produtos filtrados:', filtered); // Log de depuração
     setFilteredProducts(filtered);
   }, [products, latitude, longitude, currentUserId]);
 
+  const handleProductClick = async (item) => {
+    try {
+      if (!item.userId || !currentUserId) {
+        Alert.alert('Erro', 'Informações do usuário ou produto incompletas.');
+        return;
+      }
+
+      const chatId = `${item.userId}_${currentUserId}_${item.id}`; // ID único para o chat
+
+      // Referência ao chat no Firestore
+      const chatDocRef = doc(db, 'chats', chatId);
+      const chatDoc = await getDoc(chatDocRef);
+
+      if (!chatDoc.exists()) {
+        // Cria o chat no Firestore se não existir
+        await setDoc(chatDocRef, {
+          donorId: item.userId,
+          receiverId: currentUserId,
+          productId: item.id,
+          productName: item.nome || 'Produto sem nome',
+          status: 'pendente',
+          createdAt: serverTimestamp(),
+        });
+      }
+
+      // Navega para a tela de chat
+      navigation.navigate('Chat', {
+        chatId,
+        donorId: item.userId,
+        receiverId: currentUserId,
+        productName: item.nome || 'Produto sem nome',
+      });
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível abrir o chat.');
+      console.error('Erro ao abrir o chat:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Produtos Disponíveis (10 km)</Text>
+      <Text style={styles.title}>Produtos Disponíveis</Text>
       {filteredProducts.length === 0 ? (
         <Text style={styles.noProductsText}>Nenhum produto disponível no momento.</Text>
       ) : (
@@ -95,23 +125,11 @@ export default function ProductsScreen({ route, navigation }) {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.productItem}
-              onPress={() => {
-                const chatId = `${item.id}-${currentUserId}`; // Gera um chatId único
-                console.log('Navegando para Chat:', {
-                  chatId,
-                  donorName: item.donorName,
-                  receiverName: currentUserName,
-                }); // Log para depuração
-                navigation.navigate('Chat', {
-                  chatId,
-                  donorName: item.donorName,
-                  receiverName: currentUserName,
-                });
-              }}
+              onPress={() => handleProductClick(item)}
             >
-              <Text style={styles.productName}>{item.nome}</Text>
+              <Text style={styles.productName}>{item.nome || 'Produto sem nome'}</Text>
               <Text style={styles.productDetails}>
-                Quantidade: {item.quantidade} - Doador: {item.donorName}
+                Quantidade: {item.quantidade || 'Indisponível'} - Doador: {item.donorName || 'Anônimo'}
               </Text>
             </TouchableOpacity>
           )}

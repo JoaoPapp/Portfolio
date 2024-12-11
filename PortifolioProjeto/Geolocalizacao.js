@@ -3,34 +3,38 @@ import { View, Text, Button, StyleSheet, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from './App';
+import { auth, db } from './App';
 
 export default function GeolocationScreen({ navigation }) {
-  const [location, setLocation] = useState(null); 
-  const [address, setAddress] = useState(null); 
-  const [loading, setLoading] = useState(true); 
+  const [location, setLocation] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let locationSubscription;
 
     (async () => {
       try {
-        // Solicitar permissão para acessar a localização
+        console.log('Solicitando permissão de localização...');
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permissão Negada', 'Permissão de localização negada.');
+          Alert.alert(
+            'Permissão Negada',
+            'Permissão de localização negada. Por favor, ative-a nas configurações do dispositivo.'
+          );
           setLoading(false);
           return;
         }
 
-        // Observar mudanças na localização
+        console.log('Iniciando monitoramento da localização...');
         locationSubscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
-            timeInterval: 5 * 60 * 1000, // Atualiza a cada 5 minutos (em milissegundos)
-            distanceInterval: 10, // Ou quando o usuário se move 10 metros
+            timeInterval: 5000,
+            distanceInterval: 10,
           },
-          (loc) => {
+          async (loc) => {
+            console.log('Localização obtida:', loc.coords);
             setLocation({
               latitude: loc.coords.latitude,
               longitude: loc.coords.longitude,
@@ -39,21 +43,30 @@ export default function GeolocationScreen({ navigation }) {
             });
 
             // Fazer a geocodificação reversa para obter o endereço
-            Location.reverseGeocodeAsync({
-              latitude: loc.coords.latitude,
-              longitude: loc.coords.longitude,
-            }).then((geocode) => {
+            try {
+              const geocode = await Location.reverseGeocodeAsync({
+                latitude: loc.coords.latitude,
+                longitude: loc.coords.longitude,
+              });
+
               if (geocode.length > 0) {
                 const { city, region, country } = geocode[0];
-                setAddress(`${city}, ${region}, ${country}`);
+                const formattedAddress = `${city}, ${region}, ${country}`;
+                setAddress(formattedAddress);
+                console.log('Endereço obtido:', formattedAddress);
               } else {
                 setAddress('Endereço não encontrado');
+                console.log('Nenhum endereço encontrado.');
               }
-            });
+            } catch (geoError) {
+              console.error('Erro na geocodificação reversa:', geoError);
+              setAddress('Erro ao obter endereço');
+            }
           }
         );
       } catch (error) {
         Alert.alert('Erro', 'Erro ao obter localização: ' + error.message);
+        console.error('Erro ao solicitar localização:', error);
       } finally {
         setLoading(false);
       }
@@ -62,6 +75,7 @@ export default function GeolocationScreen({ navigation }) {
     return () => {
       if (locationSubscription) {
         locationSubscription.remove();
+        console.log('Monitoramento da localização interrompido.');
       }
     };
   }, []);
@@ -69,13 +83,14 @@ export default function GeolocationScreen({ navigation }) {
   const handleDoar = async () => {
     if (location) {
       try {
+        console.log('Salvando localização para doação:', location);
         await addDoc(collection(db, 'locations'), {
           mode: 'doar',
           latitude: location.latitude,
           longitude: location.longitude,
           timestamp: new Date(),
         });
-        navigation.navigate('CadastroAlimentos'); // Navegar para a tela de CadastroAlimentos
+        navigation.navigate('CadastroAlimentos');
       } catch (error) {
         Alert.alert('Erro', 'Erro ao salvar localização: ' + error.message);
       }
@@ -89,18 +104,57 @@ export default function GeolocationScreen({ navigation }) {
       Alert.alert('Erro', 'Localização ainda não disponível.');
       return;
     }
-    navigation.navigate('Receber'); // Navegar para a tela ReceberAlimentos
+    navigation.navigate('Receber');
   };
 
   const handleProdutosDisponiveis = () => {
     if (!location) {
       Alert.alert('Erro', 'Localização ainda não disponível.');
+      console.error('Erro: localização não disponível.');
       return;
     }
-    navigation.navigate('Products', {
+    console.log('Preparando para navegar para Produtos com localização:', location);
+
+    if (location.latitude && location.longitude) {
+      navigation.navigate('Products', {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      });
+      console.log('Navegou para a tela de Produtos com sucesso!');
+    } else {
+      Alert.alert(
+        'Erro',
+        'Os dados de localização não estão configurados corretamente. Tente novamente.'
+      );
+      console.error('Erro: Dados de localização incompletos:', location);
+    }
+  };
+
+  const handleViewChats = () => {
+    const userId = auth.currentUser?.uid; // ID do usuário autenticado
+
+    if (!userId) {
+      Alert.alert('Erro', 'Usuário não autenticado. Faça login novamente.');
+      return;
+    }
+
+    if (!location) {
+      Alert.alert('Erro', 'Localização ainda não disponível.');
+      console.error('Erro: localização não disponível.');
+      return;
+    }
+
+    console.log('Navegando para a tela de chats com:', {
+      userId,
       latitude: location.latitude,
       longitude: location.longitude,
-    }); // Navegar para a tela Tela-Produtos com parâmetros
+    });
+
+    navigation.navigate('ChatList', {
+      userId, // ID do usuário atual
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
   };
 
   return (
@@ -137,6 +191,11 @@ export default function GeolocationScreen({ navigation }) {
           onPress={handleProdutosDisponiveis}
           color="#FF9800"
         />
+        <Button
+          title="Ver Meus Chats"
+          onPress={handleViewChats}
+          color="#FF5722"
+        />
       </View>
     </View>
   );
@@ -168,9 +227,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
     marginTop: 20,
+    gap: 10,
   },
 });

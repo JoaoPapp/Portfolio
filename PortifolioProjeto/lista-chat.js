@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  addDoc,
-  serverTimestamp,
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-} from 'firebase/firestore';
+import { collection, doc, updateDoc, deleteDoc, onSnapshot, addDoc, serverTimestamp, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from './App';
 
 export default function ChatScreen({ route, navigation }) {
@@ -23,13 +11,12 @@ export default function ChatScreen({ route, navigation }) {
   const [chatStatus, setChatStatus] = useState('pendente'); // pendente, entregue, concluído
   const currentUser = auth.currentUser;
 
-  // Depuração dos parâmetros recebidos
-  useEffect(() => {
-    console.log('Parâmetros recebidos em route.params:', route.params);
+  // Debug: Verificar os parâmetros recebidos
+  console.log('Parâmetros recebidos:', route.params);
 
-    // Verificar se todos os parâmetros obrigatórios estão disponíveis
+  useEffect(() => {
+    // Verificar se os parâmetros obrigatórios estão definidos
     if (!donorId || !receiverId || !productId) {
-      console.error('Parâmetros ausentes:', { donorId, receiverId, productId });
       Alert.alert(
         'Erro',
         'Informações insuficientes para iniciar o chat. Certifique-se de que todos os parâmetros foram passados corretamente.'
@@ -38,6 +25,7 @@ export default function ChatScreen({ route, navigation }) {
       return;
     }
 
+    // Gerar o chatId com base nos parâmetros
     const generatedChatId = `${donorId}_${receiverId}_${productId}`;
     setChatId(generatedChatId);
 
@@ -47,7 +35,6 @@ export default function ChatScreen({ route, navigation }) {
         const chatDoc = await getDoc(chatRef);
 
         if (!chatDoc.exists()) {
-          console.log('Criando um novo chat com ID:', generatedChatId);
           await setDoc(chatRef, {
             donorId,
             receiverId,
@@ -57,7 +44,6 @@ export default function ChatScreen({ route, navigation }) {
             createdAt: serverTimestamp(),
           });
         } else {
-          console.log('Chat existente encontrado:', chatDoc.data());
           setChatStatus(chatDoc.data().status || 'pendente');
         }
       } catch (error) {
@@ -72,10 +58,9 @@ export default function ChatScreen({ route, navigation }) {
   useEffect(() => {
     if (!chatId) return;
 
+    // Listener para mensagens do chat
     const messagesRef = collection(db, 'chats', chatId, 'messages');
-    const messagesQuery = query(messagesRef, orderBy('timestamp', 'asc'));
-
-    const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
+    const unsubscribeMessages = onSnapshot(messagesRef, (snapshot) => {
       const loadedMessages = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -83,6 +68,7 @@ export default function ChatScreen({ route, navigation }) {
       setMessages(loadedMessages);
     });
 
+    // Listener para o status do chat
     const chatRef = doc(db, 'chats', chatId);
     const unsubscribeChat = onSnapshot(chatRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -131,7 +117,7 @@ export default function ChatScreen({ route, navigation }) {
       await updateDoc(chatRef, { status: 'concluído' });
       Alert.alert('Confirmação', 'Você confirmou o recebimento do produto.');
 
-      // Apagar o chat automaticamente após a conclusão
+      // Apagar o chat automaticamente
       await deleteDoc(chatRef);
       navigation.goBack();
     } catch (error) {
@@ -197,17 +183,73 @@ export default function ChatScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
-  productName: { fontSize: 18, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
-  errorText: { fontSize: 16, color: 'red', textAlign: 'center', marginTop: 20 },
-  message: { padding: 10, marginVertical: 5, borderRadius: 10, maxWidth: '70%' },
-  sender: { alignSelf: 'flex-end', backgroundColor: '#DCF8C6' },
-  receiver: { alignSelf: 'flex-start', backgroundColor: '#ECECEC' },
-  senderName: { fontSize: 12, fontWeight: 'bold', marginBottom: 5 },
-  inputContainer: { flexDirection: 'row', padding: 10, borderTopWidth: 1, borderTopColor: '#ddd' },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 20, padding: 10 },
-  sendButton: { padding: 10, backgroundColor: '#4CAF50', borderRadius: 20 },
-  sendButtonText: { color: '#fff', fontWeight: 'bold' },
-  actionButton: { marginTop: 20, padding: 15, backgroundColor: '#4CAF50', borderRadius: 10, alignItems: 'center' },
-  actionButtonText: { color: '#fff', fontWeight: 'bold' },
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  productName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  message: {
+    padding: 10,
+    marginVertical: 5,
+    borderRadius: 10,
+    maxWidth: '70%',
+  },
+  sender: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#DCF8C6',
+  },
+  receiver: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#ECECEC',
+  },
+  senderName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 20,
+    padding: 10,
+  },
+  sendButton: {
+    padding: 10,
+    backgroundColor: '#4CAF50',
+    borderRadius: 20,
+  },
+  sendButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  actionButton: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#4CAF50',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });
